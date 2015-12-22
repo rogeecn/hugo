@@ -43,6 +43,8 @@ import (
 	"regexp"
 )
 
+var mainSite *hugolib.Site
+
 // userError is an error used to signal different error situations in command handling.
 type commandError struct {
 	s         string
@@ -517,15 +519,29 @@ func getDirList() []string {
 
 func buildSite(watching ...bool) (err error) {
 	startTime := time.Now()
-	site := &hugolib.Site{}
-	if len(watching) > 0 && watching[0] {
-		site.RunMode.Watching = true
+	if mainSite == nil {
+		mainSite = new(hugolib.Site)
 	}
-	err = site.Build()
+	if len(watching) > 0 && watching[0] {
+		mainSite.RunMode.Watching = true
+	}
+	err = mainSite.Build()
 	if err != nil {
 		return err
 	}
-	site.Stats()
+	mainSite.Stats()
+	jww.FEEDBACK.Printf("in %v ms\n", int(1000*time.Since(startTime).Seconds()))
+
+	return nil
+}
+
+func rebuildSite(changes map[string]bool) error {
+	startTime := time.Now()
+	err := mainSite.ReBuild(changes)
+	if err != nil {
+		return err
+	}
+	mainSite.Stats()
 	jww.FEEDBACK.Printf("in %v ms\n", int(1000*time.Since(startTime).Seconds()))
 
 	return nil
@@ -563,6 +579,7 @@ func NewWatcher(port int) error {
 				staticChanged := false
 				dynamicChanged := false
 				staticFilesChanged := make(map[string]bool)
+				dynamicFilesChanged := make(map[string]bool)
 
 				for _, ev := range evs {
 					ext := filepath.Ext(ev.Name)
@@ -595,6 +612,8 @@ func NewWatcher(port int) error {
 						if staticPath, err := helpers.MakeStaticPathRelative(ev.Name); err == nil {
 							staticFilesChanged[staticPath] = true
 						}
+					} else {
+						dynamicFilesChanged[ev.Name] = true
 					}
 
 					// add new directory to watch list
@@ -632,7 +651,10 @@ func NewWatcher(port int) error {
 					fmt.Print("\nChange detected, rebuilding site\n")
 					const layout = "2006-01-02 15:04 -0700"
 					fmt.Println(time.Now().Format(layout))
-					utils.CheckErr(buildSite(true))
+					//TODO here
+
+				//	utils.CheckErr(buildSite(true))
+					rebuildSite(dynamicFilesChanged)
 
 					if !BuildWatch && !viper.GetBool("DisableLiveReload") {
 						// Will block forever trying to write to a channel that nobody is reading if livereload isn't initalized
