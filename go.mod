@@ -31,7 +31,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/jdkato/prose v1.2.0
 	github.com/kylelemons/godebug v1.1.0
-	github.com/kyokomi/emoji/v2 v2.2.7
+	github.com/kyokomi/emoji/v2 v2.2.8
 	github.com/magefile/mage v1.10.0
 	github.com/mattn/go-isatty v0.0.12
 	github.com/miekg/mmark v1.3.6
@@ -62,7 +62,7 @@ require (
 	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	golang.org/x/text v0.3.4
+	golang.org/x/text v0.3.5
 	google.golang.org/api v0.40.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.51.1 // indirect
